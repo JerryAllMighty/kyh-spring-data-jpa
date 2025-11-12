@@ -1,6 +1,7 @@
 package com.main.kyhspringdatajpa.repository;
 
 import com.main.kyhspringdatajpa.entity.Member;
+import com.main.kyhspringdatajpa.entity.Team;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +60,21 @@ class MemberJpaRepositoryTest {
 
         long deletedCount = memberJpaRepository.count();
         assertEquals(0, deletedCount);
+    }
+
+    @Test
+    public void findByUserNameAndAgeGreaterThan() {
+        //given
+
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+
+        //when
+        memberJpaRepository.save(m1);
+        memberJpaRepository.save(m2);
+
+        //then
+        List<Member> members = memberJpaRepository.findByUserNameAndAgeGreaterThan("AAA", 10);
+        assertEquals(1, members.size());
     }
 }
