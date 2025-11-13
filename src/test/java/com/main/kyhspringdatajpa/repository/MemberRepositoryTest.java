@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,12 +133,13 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
         for (Member member : result) {
             System.out.println(member);
-            
+
         }
 
     }
+
     @Test
-    public void returnType(){
+    public void returnType() {
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
 
@@ -151,22 +156,42 @@ class MemberRepositoryTest {
     @Test
     public void paging() {
         //given
-        memberRepository.save(new Member("AAA", 10));
+        memberRepository.save(new Member("AA1", 10));
         memberRepository.save(new Member("AA2", 10));
         memberRepository.save(new Member("AA3", 10));
         memberRepository.save(new Member("AA4", 10));
         memberRepository.save(new Member("AA5", 10));
 
         int age = 10;
-        int offset = 0;
-        int limit = 3;
+//        int offset = 0;
+//        int limit = 3;
+
+        PageRequest pageRequest = PageRequest.of(1, 2, Sort.by(Sort.Direction.DESC, "username"));
 
         //when
-        List<Member> members = memberRepository.findByPage(age, offset, limit);
-        long totalCount = memberRepository.totalCount(age);
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+        List<Member> content = page.getContent();
+        long totalElements = page.getTotalElements();
 
-        //then
-        assertEquals(members.size(), 3);
-        assertEquals(totalCount, 5);
+        for (Member member : page) {
+            System.out.println(member);
+        }
+        System.out.println(totalElements);
+
+        assertEquals(2, content.size());
+        assertEquals(5, page.getTotalElements());
+        assertEquals(1, page.getNumber());
+        assertEquals(3, page.getTotalPages());
+        assertEquals(false, page.isFirst());
+
+        Slice<Member> slice = memberRepository.findSliceByAge(age, pageRequest);
+        List<Member> content2 = slice.getContent();
+        assertEquals(2, content2.size());
+//        assertEquals(5, slice.getTotalElements());
+        assertEquals(1, slice.getNumber());
+//        assertEquals(3, slice.getTotalPages());
+        assertEquals(false, slice.isFirst());
+        assertEquals(true, slice.hasNext());
+
     }
 }
