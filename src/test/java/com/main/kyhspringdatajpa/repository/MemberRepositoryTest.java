@@ -1,6 +1,8 @@
 package com.main.kyhspringdatajpa.repository;
 
+import com.main.kyhspringdatajpa.dto.MemberDto;
 import com.main.kyhspringdatajpa.entity.Member;
+import com.main.kyhspringdatajpa.entity.Team;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemberRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
+    TeamRepository teamRepository;
 
     @Test
     public void testMember() {
@@ -62,7 +70,6 @@ class MemberRepositoryTest {
     @Test
     public void findByUserNameAndAgeGreaterThan() {
         //given
-
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
 
@@ -75,5 +82,91 @@ class MemberRepositoryTest {
         assertEquals(1, members.size());
     }
 
+    @Test
+    public void test() {
+        //given
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
 
+        //when
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        List<String> members = memberRepository.findUsernameList();
+
+        //when
+
+        //then
+        members.forEach(x -> System.out.println(x));
+    }
+
+    @Test
+    public void testDto() {
+        //given
+        Team t1 = new Team("teamA");
+        teamRepository.save(t1);
+
+        //when
+        Member m1 = new Member("AAA", 10, t1);
+        memberRepository.save(m1);
+
+        //then
+        List<MemberDto> members = memberRepository.findMemberDto();
+        for (MemberDto member : members) {
+            System.out.println(member);
+
+        }
+
+    }
+
+    @Test
+    void findByNames() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
+        for (Member member : result) {
+            System.out.println(member);
+            
+        }
+
+    }
+    @Test
+    public void returnType(){
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findListByUsername("AAA");
+        for (Member member : result) {
+            System.out.println(member);
+
+        }
+    }
+
+    @Test
+    public void paging() {
+        //given
+        memberRepository.save(new Member("AAA", 10));
+        memberRepository.save(new Member("AA2", 10));
+        memberRepository.save(new Member("AA3", 10));
+        memberRepository.save(new Member("AA4", 10));
+        memberRepository.save(new Member("AA5", 10));
+
+        int age = 10;
+        int offset = 0;
+        int limit = 3;
+
+        //when
+        List<Member> members = memberRepository.findByPage(age, offset, limit);
+        long totalCount = memberRepository.totalCount(age);
+
+        //then
+        assertEquals(members.size(), 3);
+        assertEquals(totalCount, 5);
+    }
 }
