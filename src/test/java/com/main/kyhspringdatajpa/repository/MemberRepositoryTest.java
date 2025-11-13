@@ -3,6 +3,8 @@ package com.main.kyhspringdatajpa.repository;
 import com.main.kyhspringdatajpa.dto.MemberDto;
 import com.main.kyhspringdatajpa.entity.Member;
 import com.main.kyhspringdatajpa.entity.Team;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
+@Rollback
 class MemberRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
 
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void testMember() {
@@ -192,6 +197,26 @@ class MemberRepositoryTest {
 //        assertEquals(3, slice.getTotalPages());
         assertEquals(false, slice.isFirst());
         assertEquals(true, slice.hasNext());
+
+    }
+
+    @Test
+    void bulkAgePlus() {
+        //given
+        memberRepository.save(new Member("AA1", 10));
+        memberRepository.save(new Member("AA2", 19));
+        memberRepository.save(new Member("AA3", 20));
+        memberRepository.save(new Member("AA4", 21));
+        memberRepository.save(new Member("AA5", 40));
+
+        int resultCount = memberRepository.bulkAgePlus(20);
+//        em.flush();
+        em.clear();
+
+        Member result = memberRepository.findListByUsername("AA5").get(0);
+
+        System.out.println(result);
+//        System.out.println();
 
     }
 }
