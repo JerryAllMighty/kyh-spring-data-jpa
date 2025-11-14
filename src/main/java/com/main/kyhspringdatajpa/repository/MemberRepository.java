@@ -2,12 +2,12 @@ package com.main.kyhspringdatajpa.repository;
 
 import com.main.kyhspringdatajpa.dto.MemberDto;
 import com.main.kyhspringdatajpa.entity.Member;
+import jakarta.persistence.Entity;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
@@ -41,8 +41,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Slice<Member> findSliceByAge(int age, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
+
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(@Param("username") String username);
 
 }
