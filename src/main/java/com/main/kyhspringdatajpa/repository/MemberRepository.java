@@ -3,6 +3,7 @@ package com.main.kyhspringdatajpa.repository;
 import com.main.kyhspringdatajpa.dto.MemberDto;
 import com.main.kyhspringdatajpa.entity.Member;
 import jakarta.persistence.Entity;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
@@ -51,5 +52,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(@Param("username") String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 
 }
