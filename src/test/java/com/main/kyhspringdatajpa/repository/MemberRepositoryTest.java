@@ -211,12 +211,37 @@ class MemberRepositoryTest {
 
         int resultCount = memberRepository.bulkAgePlus(20);
 //        em.flush();
-        em.clear();
+//        em.clear();
 
         Member result = memberRepository.findListByUsername("AA5").get(0);
 
         System.out.println(result);
 //        System.out.println();
 
+    }
+
+    @Test
+    public void findMemberLazy() {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+        //when
+        em.flush();
+        em.clear();
+        //then
+//        List<Member> members = memberRepository.findAll();
+        Member member = memberRepository.findReadOnlyByUsername("member1");
+        member.changeUsername("member2");
+        em.flush();
+//        for (Member member : members) {
+//            System.out.println(member.getTeam());
+//
+//        }
     }
 }
