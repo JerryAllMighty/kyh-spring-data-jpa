@@ -1,8 +1,10 @@
 package com.main.kyhspringdatajpa.entity;
 
+import com.main.kyhspringdatajpa.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,11 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
+//@Rollback(value = false)
 class MemberTest {
 
     @PersistenceContext
     EntityManager em;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Test
     public void testEntity() {
@@ -47,6 +52,26 @@ class MemberTest {
             System.out.println("Member.team = " + member.getTeam().getName());
 
         }
+    }
+
+    @Test
+    public void BaseEntityTest() {
+        //given
+        Member member = new Member("memberA", 10);
+        memberRepository.save(member);
+        member.changeUsername("username B");
+        em.flush();
+        em.clear();
+
+
+        //when
+        Member foundMember = memberRepository.findById(member.getId()).get();
+        System.out.println(foundMember.getCreatedDate());
+        System.out.println(foundMember.getLastModifiedDate());
+
+        System.out.println(foundMember.getCreatedBy());
+        System.out.println(foundMember.getLastModifiedBy());
+        //then
     }
 
 }
